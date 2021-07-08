@@ -1,0 +1,5 @@
+galaxy_info:
+  author: Thomas Krahn <ntbc@gmx.net>
+  description: PowerDNS Ansible library
+
+  license: Apache-2.0
