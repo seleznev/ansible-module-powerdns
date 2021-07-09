@@ -110,10 +110,9 @@ except ImportError:
 
 class PowerDNSError(Exception):
     def __init__(self, url, status_code, message):
+        super().__init__(message)
         self.url = url
         self.status_code = status_code
-        self.message = message
-        super(PowerDNSError, self).__init__()
 
 
 class PowerDNSClient:
@@ -150,6 +149,8 @@ class PowerDNSClient:
                 request_error = request_json.get('error')
             elif 'errors' in request_json:
                 request_error = request_json.get('errors')
+            elif 'msg' in request_json: # PowerDNS Admin specific key
+                request_error = request_json.get('msg')
             else:
                 request_error = 'No error message found'
             return request_error
