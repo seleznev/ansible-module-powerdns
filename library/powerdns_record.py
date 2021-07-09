@@ -182,36 +182,16 @@ class PowerDNSClient:
 
     def get_record(self, server, zone, name, rtype):
         """Search for a given record (name) in the specified zone."""
-        url = self._get_search_url(server)
-        params = {'q': name}
+        data = self.get_zone(server, zone)
 
-        resp = self._handle_request(self.session.get(url=url, params=params))
-
-        # Canonicalize record name and zone
+        # Canonicalize record name
         canonical_name = self._make_canonical(name)
-        canonical_zone = self._make_canonical(zone)
 
-        # Convert search result response to RRSet object
-        rrset = dict(records=[], comments=[])
+        for rrset in data['rrsets']:
+            if rrset['name'] == canonical_name and rrset['type'] == rtype:
+                return rrset
 
-        for record in resp:
-            if record['object_type'] != 'record' or record['type'] != rtype:
-                continue
-
-            if record['name'] == canonical_name and record['zone'] == canonical_zone:
-
-                if 'name' not in rrset:
-                    rrset['name'] = record['name']
-                if 'type' not in rrset:
-                    rrset['type'] = record['type']
-                if 'ttl' not in rrset:
-                    rrset['ttl'] = record['ttl']
-
-                rrentry = dict(content=record['content'],
-                               disabled=record['disabled'])
-                rrset['records'].append(rrentry)
-
-        return rrset
+        return dict(records=[], comments=[])
 
     def _get_request_data(self, changetype, server, zone, name, rtype, set_ptr=False, content=None, disabled=None, ttl=None):
         record_content = list()
